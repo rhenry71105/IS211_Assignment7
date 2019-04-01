@@ -1,176 +1,139 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin/python2.7
+#
+#
+#
 """
-   Week 7 Assignment - Pig Game
-   Author: Rickardo Henry
+	FileName: Pig.py
+	Author: Rickardo Henry
+	Description:
+			Revised Version of pig.py
+	
+	Note:
+		The Program was written in a module format, so to the run program you'd have to open a python interpreter shell and import pig.
+		But this new version of the program is the CLI version of the pig.py. It has a command-line interface and can be interacted with.
 """
 
 
 import random
 
+class Player():
+	def __init__(self):
+		self.turn = False
+		self.roll = True
+		self.hold = False
+		self.score = 0
+	
+	def decide(self):
+		decision_msg = """%s: Hold (h) or Roll (r)?
+>> """ % self.name
+		decision = raw_input(decision_msg)
+		decision = str(decision)
+		if decision == 'h':
+			self.hold = True
+			self.roll = False
+		elif decision == 'r':
+			self.hold = False
+			self.roll = True
+		else:
+			print('Incorrect Input.  Please enter h or r')
+			self.decide()
+	
+class Die():
+	def __init__(self):
+		self.value = int()
+		seed = 0
+	def roll(self):
+		self.value = random.randint(1,6)
+		
+		
+class Game():
+	def __init__(self,player1,player2,die):
+		self.turn_score = 0
+		self.die = die
+		self.player1 = player1
+		self.player2 = player2
+		self.player1.score = 0
+		self.player2.score = 0
+		self.player1.name = "Player 1"
+		self.player2.name = "Player 2"
+		
+		
+		coin_flip = random.randint(1,2)
+		if coin_flip == 1:
+			self.current_player = player1
+			print "Player 1 has won the Coin Flip, will start first"
+		elif coin_flip == 2:
+			self.current_player = player2
+			print "Player 2 has won the Coin Flip, will start first"
+		else:
+			print "Coin Flip Error, not heads or tails"
+		self.turn()
+		
+	def next_turn(self):
+		self.turn_score = 0
+		if self.player1.score >= 100:
+			print "Player 1 has won the game!"
+			print "Score:",self.player1.score
+			self.endgame()
+			startNewGame()
+		elif self.player2.score >= 100:
+			print "Player 2 has won the game!"
+			print "Score:",self.player2.score
+			self.endgame()
+			startNewGame()
+		else:
+			if self.current_player == self.player1:
+				self.current_player = self.player2
+			elif self.current_player == self.player2:
+				self.current_player = self.player1
+			else:
+				print "Next Turn Error, current_player neither Player 1 or Player 2"
 
-class Die(object):
-    """
-		A dice class.
-
-    Generates a random number from 1 to 6.
-    """
-    random.seed(0)
-
-    def __init__(self):
-        """
-           Constructor for the Die() class.
-	"""
-        self.rolled = 0
-
-    def roll(self):
-        """
-           The dice roll function for the Die() class.
-
-        Attributes:
-            Die (class): Calls the Die() class.
-
-        Returns:
-            (Int) An integer to be used as the rolled die value in the pig game.
-        """
-        self.rolled = random.randint(1, 6)
-        return self.rolled
-
-
-class Player(object):
-    """
-		A game participant class.
-
-    Stores the player names to be used in the pig game.
-
-    Args:
-        name (string): The name of the player.
-
-    Attributes:
-        name (string): The name of the player.
-    """
-    def __init__(self, name):
-        """
-	Constructor for the Player() class.
-
-        Args:
-            name (string): The name of the player.
-
-        Attributes:
-            Player() (class): Calls the Player() class.
-            name (string): The name of the player.
-        """
-        self.name = name
-        self.totscore = 0
-        self.turnscore = 0
-        self.turn_status = 0
-        print 'Welcome to the game of pig, {}.'.format(self.name)
-
-
-class Game(object):
-    """
-			A pig game class.
-
-    Stores the player names by calling the Player() class and calls the Die
-    class to use in the game.
-
-    Args:
-        player1 (string): the name of player 1.
-        player2 (string): the name of player 2.
-
-    Attirbutes:
-        player1 (string): the name of player 1.
-        player2 (string): the name of player 2.
-    """
-    def __init__(self, player1, player2):
-        """Constructor for the Game() class.
-
-        Args:
-            player1 (string): the name of player 1.
-            player2 (string): the name of player 2.
-
-        Attributes:
-            Game (class): Call the Game() class.
-            Player (class): Calls the Player() class.
-            player1 (string): the name of player 1.
-            player2 (string): the name of player 2.
-        """
-        self.player1 = Player(player1)
-        self.player2 = Player(player2)
-        self.die = Die()
-        self.turn(self.player1)
-
-    def turn(self, player):
-        """
-           The initial turn function for the Pig game.
-	"""
-        player.turn_status = 1
-        print 'It is {}\'s turn.'.format(player.name)
-        while player.turn_status == 1 and player.totscore < 100:
-            roll = self.die.roll()
-            if roll == 1:
-                print ('Sorry {}! You rolled a 1 and forfeit all '
-                       'points this turn. Your total score is {}. Pass die '
-                       'to next player.').format(player.name, player.totscore)
-                player.turnscore = 0
-                self.next_player()
-            else:
-                print '{} rolled a {}.'.format(player.name, roll)
-                player.turnscore += roll
-                print ('Your current point total '
-                       'for this turn is {}. Your total '
-                       'score is {}').format(player.turnscore, player.totscore)
-                self.turn_choice(player)
-        print ('{} score is {} and'
-               'has won the game!').format(player.name, player.totscore)
-
-    def turn_choice(self, player):
-        """
-	Pig game turn decision. Asks a player if they would like to
-        hold or roll the dice to keep points, or roll again to risk losing all
-        points that turn, or add more to the turn total.
-
-        Args:
-            player (string): the name of the player whose turn it currently is.
-
-        Returns:
-            String: Depending on the choice entered, a message stating the
-            points added to the turn score, the total score, or the winner
-            of the pig game.
-        """
-        choice = raw_input('{}, Hold or Roll?'.format(player.name))
-        choice = (choice[0])
-        if choice.lower() == 'h':
-            player.totscore += player.turnscore
-            print ('{} points have been '
-                   'added to {}\'s total '
-                   'score.').format(player.turnscore, player.name)
-            if player.totscore >= 100:
-                print ('{} wins with '
-                       'a score of {}.').format(player.name, player.totscore)
-                raise SystemExit
-            else:
-                player.turnscore = 0
-                print ('{}\'s score is now {}.'
-                       ' Please pass die to next'
-                       'player.').format(player.name, player.totscore)
-                self.next_player()
-        elif choice.lower() == 'r':
-            self.turn(player)
-        else:
-            print '***Type Hold (H/h) or Roll (R/r) only, please.***'
-            self.turn_choice(player)
-
-    def next_player(self):
-        """
-	Swithces to the next player in the game.
-
-        Attributes:
-            Game (class): Calls the Game() class.
-        """
-        if self.player1.turn_status == 1:
-            self.player1.turn_status = 0
-            self.turn(self.player2)
-        else:
-            self.player2.turn_status = 0
-            self.turn(self.player1)
+			print "New Turn, player is now:", self.current_player.name
+			self.turn()
+		
+	def turn(self):
+		print "Player 1 Score:", self.player1.score				
+		print "Player 2 Score:", self.player2.score
+		self.die.roll()
+		if(self.die.value == 1):
+			print "You Rolled a 1! No Points for You!"
+			self.turn_score = 0
+			self.next_turn()
+		else:
+			self.turn_score = self.turn_score + self.die.value
+			print "You rolled a:",self.die.value
+			print "Current Value is:", self.turn_score
+			self.current_player.decide()
+			if(self.current_player.hold == True and self.current_player.roll == False):
+				self.current_player.score = self.current_player.score + self.turn_score
+				self.next_turn()
+			elif(self.current_player.hold == False and self.current_player.roll == True):
+				self.turn()
+	def endgame(self):
+		self.player1 = None
+		self.player2 = None
+		self.die = None
+		self.turn_score = None
+	
+def startNewGame():
+        msg = """Start New Game (Y/N)?
+>> """
+	start = raw_input(msg)
+	if start == 'Y' or start == 'y':
+		player1 = Player()
+		player2 = Player()
+		die = Die()					
+		newgame = Game(player1,player2,die)
+			
+startNewGame()
+		
+			
+				
+			
+		
+	
+	
+		
+	
+	
